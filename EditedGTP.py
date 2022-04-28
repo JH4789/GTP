@@ -13,15 +13,15 @@ import sys
 philosophy_list = ['Philosophy', 'Philosophical', 'Existence']
 
 ## this is the default list of topics we experiment with
-topics_default = [#'https://en.wikipedia.org/wiki/Xkcd',
-                  #'https://en.wikipedia.org/wiki/GNU_Project',
+topics_default = ['https://en.wikipedia.org/wiki/Xkcd',
+                  'https://en.wikipedia.org/wiki/GNU_Project',
                   'https://en.wikipedia.org/wiki/Bertrand_Russell',
-                  #'https://en.wikipedia.org/wiki/Plague_of_Justinian',
-                  #'https://en.wikipedia.org/wiki/Public_health',
+                  'https://en.wikipedia.org/wiki/Plague_of_Justinian',
+                  'https://en.wikipedia.org/wiki/Public_health',
                 
-                  #'https://en.wikipedia.org/wiki/Spark_plug',
-                  #'https://en.wikipedia.org/wiki/Quantum_entanglement',
-                  #'https://en.wikipedia.org/wiki/Toilet_paper'
+                  'https://en.wikipedia.org/wiki/Spark_plug',
+                  'https://en.wikipedia.org/wiki/Quantum_entanglement',
+                  'https://en.wikipedia.org/wiki/Toilet_paper'
 ]
 
 def main():
@@ -122,8 +122,11 @@ def find_first_href_after_paragraph(master_url, page_html):
     
     if page_html.find('<p>', first_p_ind+3) < page_html.find('<b>',first_p_ind+3):
        first_p_ind = page_html.find('<p>', first_p_ind+6)
-   
-    first_p_ind = find_non_list(page_html, first_p_ind,first_p_ind, 0)
+    html_after_p = ' '
+    html_after_p = find_non_list(page_html, first_p_ind,first_p_ind, 0)
+    #print('NONE FLAG')
+    #print(type(html_after_p))
+    #last_p_ind = page_html.find('</p>', first_p_ind)
     """
     print(test-first_p_ind)
     if(test-first_p_ind < 50):
@@ -136,9 +139,12 @@ def find_first_href_after_paragraph(master_url, page_html):
     if page_html[first_p_ind+3:first_p_ind+6] == '<b>':
         first_p_ind = page_html.find('<p>', first_p_ind+6)
     """
-    html_after_p = page_html[first_p_ind:]
     
+    #html_after_p = page_html[first_p_ind:]
+    #if html_after_p is None:
+        #print('NONE')
     anchor_split = html_after_p.split('</a>')
+    #print(anchor_split[0:20])
     
     anchor_tag = '<a href="'
     series_tag = '/wiki/Categories: '
@@ -163,7 +169,7 @@ def find_first_href_after_paragraph(master_url, page_html):
             ## trim the text
             
             anchor_text = anchor_text[pos_after_anchor + len(anchor_tag):]
-            print(anchor_text)
+            #print(anchor_text)
             try:
                 end = anchor_text.index(endtag)
             except:
@@ -171,8 +177,8 @@ def find_first_href_after_paragraph(master_url, page_html):
             
         
         href_url = anchor_text[:end]
-        print(href_url)
-        print(canonicalize_topic(href_url))
+        #print(href_url)
+        #print(canonicalize_topic(href_url))
         if open_parentheses_until_here > 0:
             continue            # skip anchors that are in parentheses
         ## there only some URLs we consider: those that don't start
@@ -256,16 +262,25 @@ def find_non_list(page_html, index,copy, count):
         find_non_list(page_html, index,copy, count)
     else:
         return copy
-    """
-    print('DEBUG')
     
+    print('DEBUG')
+    """
     copy = page_html.find('</p>' , index+3)
-    print('Flag')
-    print(page_html[index:copy+4])
-    if page_html.find('<ul>', index, copy+4) == -1 and page_html.find('<br />', index, copy+4) == -1 and page_html.find('<i>', index, copy+4) == -1:
-        
-        return index
+    
+    #print('Flag')
+    
+    
+    if page_html.find('<ul>', index, copy+4) == -1 and page_html.find('<br />', index, copy+4) == -1:
+        if page_html.find('<a href', index, copy+4) == -1:
+            index = page_html.find('<p>', index+3)
+            return find_non_list(page_html, index, copy,count)
+        else:
+            #print(page_html[index:copy+40])
+            #print('REUTNRENELEDEJD', index, copy)
+            new_html = page_html[index:copy]
+            #print(type(new_html))
+            return new_html
     else:
         index = page_html.find('<p>', index+3)
-        find_non_list(page_html, index, copy,count)
+        return find_non_list(page_html, index, copy,count)
 main()
